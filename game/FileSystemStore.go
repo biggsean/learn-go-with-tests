@@ -1,8 +1,9 @@
-package main
+package poker
 
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 )
@@ -77,4 +78,22 @@ func initializePlayerDBFile(file *os.File) error {
 	}
 
 	return nil
+}
+
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatalf("problem opening %s, %v", path, err)
+	}
+
+	closeFunc := func() {
+		db.Close()
+	}
+
+	store, err := NewFileSystemPlayerStore(db)
+	if err != nil {
+		log.Fatalf("problem creating file system player store, %v", err)
+	}
+
+	return store, closeFunc, nil
 }
